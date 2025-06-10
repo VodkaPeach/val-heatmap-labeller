@@ -2,22 +2,45 @@ import React, { useState } from 'react';
 import { Zoom } from '@vx/zoom';
 import { localPoint } from '@vx/event';
 import { RectClipPath } from '@vx/clip-path';
-import { scaleLinear } from '@vx/scale';
 const bg = '#0a0a0a';
-const points = [...new Array(1000)];
-
-const colorScale = scaleLinear({ range: [0, 1], domain: [0, 1000] });
-const sizeScale = scaleLinear({ domain: [0, 600], range: [0.5, 8] });
 
 const initialTransform = {
-  scaleX: 1.27,
-  scaleY: 1.27,
-  translateX: -211.62,
-  translateY: 162.59,
+  scaleX: 0.6,
+  scaleY: 0.6,
+  translateX: 0,
+  translateY: 0,
   skewX: 0,
   skewY: 0,
 };
-const Window = ({width, height}) => {
+const Window = ({width, height, mode, setMode, cursor, setCursor, killPoints, setKillPoints, deathPoints, setDeathPoints, setLatestTransform}) => {
+  const handleDragStart = (e, zoom) => {
+    zoom.dragStart(e)
+    setCursor("grabbing")
+  }
+  const handleDragEnd = (e, zoom) => {
+    zoom.dragEnd(e)
+    setCursor("grab")
+  }
+  const handleJotKill = (e, zoom) => {
+    const point = localPoint(e)
+    const {scaleX, scaleY, translateX, translateY} = zoom.transformMatrix
+    setLatestTransform(zoom.transformMatrix)
+    const inverted = {
+      x: (point.x - translateX)  / scaleX,
+      y: (point.y - translateY)  / scaleY,
+    };
+    setKillPoints(prev => [...prev, {x: inverted.x, y: inverted.y}])
+  }
+  const handleJotDeath = (e, zoom) => {
+    const point = localPoint(e)
+    const {scaleX, scaleY, translateX, translateY} = zoom.transformMatrix
+    setLatestTransform(zoom.transformMatrix)
+    const inverted = {
+      x: (point.x - translateX)  / scaleX,
+      y: (point.y - translateY)  / scaleY,
+    };
+    setDeathPoints(prev => [...prev, {x: inverted.x, y: inverted.y}])
+  }
     return(
       <div>
         <Zoom
@@ -34,24 +57,47 @@ const Window = ({width, height}) => {
             <svg
               width={width}
               height={height}
-              style={{ cursor: zoom.isDragging ? 'grabbing' : 'grab' }}
+              style={{ cursor: cursor}}
             >
               <RectClipPath id="zoom-clip" width={width} height={height} />
-              <rect width={width} height={height} rx={14} fill={bg} />
+              <rect width={width} height={height} fill={bg} />
               <g transform={zoom.toString()}>
-                
+                <image href='../maps/Fracture.png' x={0} y={0} preserveAspectRatio="xMidYMid meet"/>
+                {killPoints.map((point, i)=>(
+                  <circle key={i} cx={point.x} cy={point.y} r={6} fill='green' />
+                ))}
+                {deathPoints.map((point, i)=>(
+                  <g key={i+"d"}>
+                    <line x1={point.x - 6} y1={point.y + 6} x2={point.x + 6} y2={point.y - 6} stroke="red" strokeWidth={6} />
+                    <line x1={point.x - 6} y1={point.y - 6} x2={point.x + 6} y2={point.y + 6} stroke="red" strokeWidth={6} />
+                  </g>
+                ))}
               </g>
-              <rect
+              {mode=="kill" && <rect
                 width={width}
                 height={height}
                 rx={14}
                 fill="transparent"
-                onTouchStart={zoom.dragStart}
+                onMouseDown={(e)=>handleJotKill(e,zoom)}
+              />}
+              {mode=="death" && <rect
+                width={width}
+                height={height}
+                rx={14}
+                fill="transparent"
+                onMouseDown={(e)=>handleJotDeath(e,zoom)}
+              />}
+              {mode=="zoom" && <rect
+                width={width}
+                height={height}
+                rx={14}
+                fill="transparent"
+                onTouchStart={()=>handleDragStart(zoom)}
                 onTouchMove={zoom.dragMove}
-                onTouchEnd={zoom.dragEnd}
-                onMouseDown={zoom.dragStart}
+                onTouchEnd={()=>handleDragEnd(zoom)}
+                onMouseDown={(e)=>handleDragStart(e, zoom)}
                 onMouseMove={zoom.dragMove}
-                onMouseUp={zoom.dragEnd}
+                onMouseUp={(e)=>handleDragEnd(e, zoom)}
                 onMouseLeave={() => {
                   if (zoom.isDragging) zoom.dragEnd();
                 }}
@@ -59,7 +105,7 @@ const Window = ({width, height}) => {
                   const point = localPoint(event) || { x: 0, y: 0 };
                   zoom.scale({ scaleX: 1.1, scaleY: 1.1, point });
                 }}
-              />
+              />}
             </svg>
             <div className="controls">
               <button

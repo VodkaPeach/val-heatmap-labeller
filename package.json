@@ -13,6 +13,7 @@
     "@tailwindcss/vite": "^4.1.8",
     "@vx/vx": "^0.0.199",
     "react": "^19.1.0",
+    "react-csv": "^2.2.2",
     "react-dom": "^19.1.0",
     "tailwindcss": "^4.1.8"
   },
