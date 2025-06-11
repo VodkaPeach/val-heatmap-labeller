@@ -82,7 +82,7 @@ const Window = ({width, height, mode, cursor, setCursor, killPoints, setKillPoin
               <RectClipPath id="zoom-clip" width={width} height={height} />
               <rect width={width} height={height} fill={`gray`} />
               <g transform={zoom.toString()}>
-                <image href={`../maps/${map}.png`} x={0} y={0} preserveAspectRatio="xMidYMid meet"/>
+                <image href={`${import.meta.env.BASE_URL}val-heatmap-labeller/maps/${map}.png`} x={0} y={0} preserveAspectRatio="xMidYMid meet"/>
                 {killPoints.map((point, i)=>(
                   <circle key={i} cx={point.x} cy={point.y} r={6} fill='green' />
                 ))}
