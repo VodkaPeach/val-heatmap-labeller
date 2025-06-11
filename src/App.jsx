@@ -12,10 +12,11 @@ function App() {
   const [latestTransform, setLatestTransform] = useState(null)
   return (
     <div className="flex flex-row">
-      <Sidemenu mode={mode} setMode={setMode} setCursor={setCursor} deathPoints={deathPoints} killPoints={killPoints} latestTransform={latestTransform}/>
+      <Sidemenu mode={mode} setMode={setMode} setCursor={setCursor} deathPoints={deathPoints} killPoints={killPoints} latestTransform={latestTransform} setMap={setMap} map={map}/>
       <Window 
       width={600}
       height={600}
+      map={map}
       mode={mode} 
       setMode={setMode} 
       cursor={cursor} 

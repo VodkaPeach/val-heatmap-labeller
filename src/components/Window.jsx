@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Zoom } from '@vx/zoom';
 import { localPoint } from '@vx/event';
 import { RectClipPath } from '@vx/clip-path';
-const bg = '#0a0a0a';
 
 const initialTransform = {
   scaleX: 0.6,
@@ -12,7 +11,28 @@ const initialTransform = {
   skewX: 0,
   skewY: 0,
 };
-const Window = ({width, height, mode, setMode, cursor, setCursor, killPoints, setKillPoints, deathPoints, setDeathPoints, setLatestTransform}) => {
+
+const calcGrids = () => {
+  const start = 60/0.6;
+  const cellSize = 60/0.6;
+  const gridCount = 10;
+
+  const gridCoords = [];
+
+  for (let i = -1; i < gridCount; i++) {
+      const coord = start + i * cellSize;
+      gridCoords.push({x1: coord, y1: 0, x2: coord, y2: 1000}, {x1: 0, y1: coord, x2: 1000, y2: coord})
+  }
+  return gridCoords
+}
+
+
+
+const Window = ({width, height, mode, cursor, setCursor, killPoints, setKillPoints, deathPoints, setDeathPoints, setLatestTransform, map}) => {
+  const grids = calcGrids().map((coords, i) => (
+                    <line key={i} x1={coords.x1} y1={coords.y1} x2={coords.x2} y2={coords.y2} />
+                  ))
+  
   const handleDragStart = (e, zoom) => {
     zoom.dragStart(e)
     setCursor("grabbing")
@@ -60,9 +80,9 @@ const Window = ({width, height, mode, setMode, cursor, setCursor, killPoints, se
               style={{ cursor: cursor}}
             >
               <RectClipPath id="zoom-clip" width={width} height={height} />
-              <rect width={width} height={height} fill={bg} />
+              <rect width={width} height={height} fill={`gray`} />
               <g transform={zoom.toString()}>
-                <image href='../maps/Fracture.png' x={0} y={0} preserveAspectRatio="xMidYMid meet"/>
+                <image href={`../maps/${map}.png`} x={0} y={0} preserveAspectRatio="xMidYMid meet"/>
                 {killPoints.map((point, i)=>(
                   <circle key={i} cx={point.x} cy={point.y} r={6} fill='green' />
                 ))}
@@ -72,6 +92,9 @@ const Window = ({width, height, mode, setMode, cursor, setCursor, killPoints, se
                     <line x1={point.x - 6} y1={point.y - 6} x2={point.x + 6} y2={point.y + 6} stroke="red" strokeWidth={6} />
                   </g>
                 ))}
+                <g stroke='gold'>
+                  {grids}
+                </g>
               </g>
               {mode=="kill" && <rect
                 width={width}
@@ -120,14 +143,8 @@ const Window = ({width, height, mode, setMode, cursor, setCursor, killPoints, se
               >
                 -
               </button>
-              <button className="btn btn-lg" onClick={zoom.center}>
-                Center
-              </button>
               <button className="btn btn-lg" onClick={zoom.reset}>
                 Reset
-              </button>
-              <button className="btn btn-lg" onClick={zoom.clear}>
-                Clear
               </button>
             </div>
           </div>

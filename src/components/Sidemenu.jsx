@@ -1,8 +1,23 @@
 import { useState } from "react";
 import { CSVLink} from "react-csv";
 
-const Sidemenu = ({ mode, setMode, setCursor, killPoints, deathPoints, latestTransform}) => {
+const Sidemenu = ({ mode, setMode, setCursor, killPoints, deathPoints, latestTransform, map, setMap}) => {
+    const [menuActive, setMenuActive] = useState(false)
     const [csvData, setCSVData] = useState([["Coordinate", "Kills", "Deaths", "Differential"]])
+    const maps = ["Ascent", "Haven", "Icebox", "Lotus", "Pearl", "Fracture", "Split"]
+    const mapMenu = maps.map((m) => (
+        <li className="hover:bg-gray-600" key={m} onClick={()=>handleSetMap(m)}>{m}</li>
+    ))
+    
+    const handleSetMap = (map) => {
+        setMap(map)
+        setMenuActive(false)
+    }
+
+    const handleMapMenuToggle = () => {
+        setMenuActive(prev => !prev)
+    }
+
     const handleSetMode = (target) => {
         setMode(target)
         if (target !== "zoom") {
@@ -13,8 +28,8 @@ const Sidemenu = ({ mode, setMode, setCursor, killPoints, deathPoints, latestTra
         }
     }
     const generateCSV = (k, d, diff) => {
-        for(let i=1; i<diff.length; i++) {
-            for(let j=1;j<diff.length;j++){
+        for(let i=0; i<diff.length; i++) {
+            for(let j=0;j<diff.length;j++){
                 if(k[i][j]!=0 || d[i][j]!=0){
                     setCSVData(prev=>[...prev, [`${i},${j}`, k[i][j], d[i][j], diff[i][j]]])
                 }
@@ -24,13 +39,12 @@ const Sidemenu = ({ mode, setMode, setCursor, killPoints, deathPoints, latestTra
     }
     const toGridCoords = (x, y, size, gridNum) => {
         const {scaleX, scaleY, translateX, translateY} = latestTransform
-        console.log(latestTransform)
-        const col = Math.ceil((x*scaleX+translateX)/(size/gridNum))
-        const row = Math.ceil((y*scaleY+translateY)/(size/gridNum))
+        const col = Math.floor((x*scaleX+translateX)/(size/gridNum))
+        const row = Math.floor((y*scaleY+translateY)/(size/gridNum))
         return({row, col})
     }
     const calcDiff = (k, d) => {
-        const diffGrid = Array.from({ length: 11 }, () => Array(11).fill(0));
+        const diffGrid = Array.from({ length: 10 }, () => Array(10).fill(0));
         for(let i=1; i<k.length; i++) {
             for(let j=1;j<k.length;j++){
                 diffGrid[i][j] = k[i][j]-d[i][j]
@@ -39,9 +53,8 @@ const Sidemenu = ({ mode, setMode, setCursor, killPoints, deathPoints, latestTra
         return diffGrid
     }
     const handleCSV = () => {
-        console.log(killPoints)
-        const killGrid = Array.from({ length: 11 }, () => Array(11).fill(0));
-        const deathGrid = Array.from({ length: 11 }, () => Array(11).fill(0));
+        const killGrid = Array.from({ length: 10 }, () => Array(10).fill(0));
+        const deathGrid = Array.from({ length: 10 }, () => Array(10).fill(0));
         if (killPoints) {
             killPoints.map((point) => {
             const {row, col} = toGridCoords(point.x, point.y, 600, 10)
@@ -57,20 +70,27 @@ const Sidemenu = ({ mode, setMode, setCursor, killPoints, deathPoints, latestTra
         const diffGrid = calcDiff(killGrid, deathGrid)
         
         generateCSV(killGrid, deathGrid, diffGrid)
-        console.log(csvData)
     }
     return (
-        <div className="min-h-100 w-1/5 bg-black text-white">
+        <div className="min-h-100 w-1/5 bg-cyan-950 text-white flex flex-col gap-3">
+            <span className="px-4 mt-5">Map</span>
+            <div className="px-20 bg-black place-self-center">
+                <button className="bg-fuchsia-900" onClick={handleMapMenuToggle}>{map}</button>
+                {menuActive && <ul>{mapMenu}</ul>}
+            </div>
+            
+            <span className="w-full pl-4">Mode</span>
             <div className="flex flex-row gap-3">
-                <button className={mode === "zoom" ? "bg-blue-500" : "bg-gray-700"} onClick={()=>handleSetMode("zoom")}>Drag</button>
-                <button className={mode === "kill" ? "bg-blue-500" : "bg-gray-700"} onClick={()=>handleSetMode("kill")}>Kill</button>
-                <button className={mode === "death" ? "bg-blue-500" : "bg-gray-700"} onClick={()=>handleSetMode("death")}>Death</button>
+                
+                <button className={mode === "zoom" ? "bg-fuchsia-900" : "bg-gray-700"} onClick={()=>handleSetMode("zoom")}>Drag&Zoom</button>
+                <button className={mode === "kill" ? "bg-fuchsia-900" : "bg-gray-700"} onClick={()=>handleSetMode("kill")}>Label Kill</button>
+                <button className={mode === "death" ? "bg-fuchsia-900" : "bg-gray-700"} onClick={()=>handleSetMode("death")}>Label Death</button>
             </div>
 
-            <div className="flex flex-col">
-                <button onClick={handleCSV}>Save csv</button>
-                <CSVLink data={csvData}>Download CSV</CSVLink>
-            </div>
+            
+            <button className="w-fit place-self-center bg-gray-700 text-center" onClick={handleCSV}>Save</button>
+            <CSVLink className="place-self-center bg-gray-700" data={csvData}>{`Download CSV (save first)`}</CSVLink>
+            
             
         </div>
     )
