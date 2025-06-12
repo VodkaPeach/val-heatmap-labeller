@@ -1,12 +1,23 @@
-# React + Vite
+# Valorant engagement labeller
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Motivation
 
-Currently, two official plugins are available:
+@Ominousx created [valorgrids](https://github.com/Ominousx/valorgrids): a heatmap tool to analyse activity patterns. Users need to supply a CSV file that labels various engagement data points (kills, deaths, etc.) on a predefined 10x10 grid system. The purpose of the web app is to expedite the labelling process by providing an interactive interface.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## How to use
 
-## Expanding the ESLint configuration
+On the left menu:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. Choose Map
+2. Choose Mode (Drag & zoom/mark kills/mark deaths)
+3. Press the save button once done labelling
+4. Download CSV output
+
+Refer to [valorgrids](https://github.com/Ominousx/valorgrids) on how to use the heatmap tool.
+
+## Features to be added
+
+1. filter
+2. delete data points
+3. preview CSV
+4. support other data types
