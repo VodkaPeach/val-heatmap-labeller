@@ -1,5 +1,13 @@
 # Valorant engagement labeller
 
+Label kills and deaths on the target map:
+
+![interface](/public/demo/interface.png)
+
+Generate data as CSV:
+
+![CSV](/public/demo/CSV.png)
+
 ## Motivation
 
 @Ominousx created [valorgrids](https://github.com/Ominousx/valorgrids): a heatmap tool to analyse activity patterns. Users need to supply a CSV file that labels various engagement data points (kills, deaths, etc.) on a predefined 10x10 grid system. The purpose of the web app is to expedite the labelling process by providing an interactive interface.
